@@ -1,0 +1,7 @@
+data
+chromedriver
+__pychache__
+*.xlsx
+*.pdf
+secret.json
+*.png
