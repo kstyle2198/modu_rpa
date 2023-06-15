@@ -1,16 +1,12 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import requests
 import time
-import datetime
 from slack import *
 from config import get_secret
 import pandas as pd
-import pyautogui as gui
 
 def nextXpath(path):
     return driver.find_element('xpath', path)
@@ -19,9 +15,7 @@ def num_check(num):
     if num >= 8:
         return str(8)
     else:
-        return str(7)
-    
-    
+        return str(7)    
 
 def web_wait(경로):
     try:
@@ -31,10 +25,6 @@ def web_wait(경로):
     except:
         print("에러")
         
-        
-# WebDriverWait(driver, 10).until(EC.presence_of_element_located(By.XPATH, "~~~")) # 기본 대기시간 설정하되, 로딩 완료시 바로 실행하는 코드
-
-
 df = pd.read_excel("data/전화번호리스트.xlsx")
 email = get_secret("email")
 password = get_secret("pw")
@@ -44,14 +34,13 @@ driver = webdriver.Chrome(executable_path="./chromedriver/chromedriver.exe")
 driver.get(url)
 time.sleep(2)
 
-
 # 로그인/
 nextXpath('//*[@id="Header"]/div/ul/li[7]/a[1]/b').click()
 time.sleep(2)
 nextXpath('//*[@id="root"]/div[2]/div/div/div/div/div[1]/form/div[1]/input').send_keys(email)
 nextXpath('//*[@id="root"]/div[2]/div/div/div/div/div[1]/form/div[2]/div/input').send_keys(password)
 nextXpath('//*[@id="root"]/div[2]/div/div/div/div/div[1]/form/button').send_keys(Keys.ENTER) 
-time.sleep(2)
+time.sleep(3)
 
 results = []
 
@@ -65,7 +54,6 @@ for i in range(len(df['사번'])):
     nextXpath(경로).click()
     time.sleep(0.1)
 
-
     #템플릿 화면 이동
     경로 = '/html/body/div[1]/div[2]/div/div[2]/div[2]/section[1]/ul/li[3]/a/div/span'   
     web_wait(경로)
@@ -73,7 +61,7 @@ for i in range(len(df['사번'])):
     time.sleep(0.1)
     
     # 첫번째 템플릿 선택
-    경로 = '/html/body/div[1]/div[2]/div/div[4]/div/div/div[2]/ul/div[1]/li/ul/li[1]/span'
+    경로 = '//*[@id="root"]/div[2]/div/div[4]/div/div/div[2]/ul/div[1]/li/ul/li[1]/span'
     web_wait(경로)
     nextXpath(경로).click()
 
@@ -135,7 +123,7 @@ for i in range(len(df['사번'])):
     경로 = '//*[@id="root"]/div[2]/div/div/div/div/div[2]/div/div[1]/div/div[2]/div/input'
     web_wait(경로)
     nextXpath(경로).clear
-    nextXpath(경로).send_keys("5")   
+    nextXpath(경로).send_keys("4")   
 
     # 설정완료 버튼 클릭
     경로 = '//*[@id="root"]/div[2]/div/div/div/div/div[3]/div/button[2]/span'
@@ -163,14 +151,11 @@ for i in range(len(df['사번'])):
     print(msg)
     results.append(msg)
     
-    if (int(i)+1) % 3 == 0:
+    if (int(i)+1) % 50 == 0:
         Slack_Msg(f"{int(i)+1}번째 발송 완료")
-        
+        time.sleep(5)
 
 print("전체 발송 완료")
-print(results)
 result_df = pd.DataFrame({"사번": 대상자[0] ,"결과": results})
 result_df.to_excel("./results1.xlsx")
 Slack_Msg(f"전체 {int(i)+1}명 발송 완료")
-
-
